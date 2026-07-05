@@ -1,0 +1,18 @@
+# Netlify config for the Next.js (App Router) 2AFC game.
+# The official plugin turns the API routes (/api/session, /api/responses,
+# /api/export, /api/stats) into serverless functions, so server-side round
+# signing and Firestore writes work in production.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Env vars are set in the Netlify UI (Site settings -> Environment variables),
+# NOT here — see .env.example / README for the list:
+#   FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY  (persistent store)
+#   SESSION_SECRET        (signs the anti-peek round tokens)
+#   EXPORT_TOKEN          (guards /api/export, /api/stats, /results)
+#   NEXT_PUBLIC_SESSION_LENGTH = 8   (there are 8 ELEC-042 pairs)
