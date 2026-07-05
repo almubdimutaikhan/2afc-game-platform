@@ -54,12 +54,24 @@ export default function Done({
         </div>
       </div>
 
-      <button
-        onClick={onRestart}
-        className="mt-7 rounded-xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-      >
-        Play again
-      </button>
+      <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+        <button
+          onClick={onRestart}
+          className="rounded-xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+        >
+          Play again
+        </button>
+        <a
+          href="/api/export"
+          download="results.csv"
+          className="inline-flex items-center gap-2 rounded-xl border border-sky-400/30 bg-sky-400/10 px-6 py-3 text-sm font-semibold text-sky-200 transition hover:bg-sky-400/20"
+        >
+          ⬇ Download results.csv
+        </a>
+      </div>
+      <div className="mt-2 text-xs text-slate-500">
+        Public — everyone&apos;s responses so far, exported fresh as CSV.
+      </div>
     </motion.div>
   );
 }

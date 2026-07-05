@@ -20,11 +20,11 @@ function toCsv(rows: any[]): string {
   );
 }
 
+// PUBLIC endpoint: anyone can download all responses so far as CSV (or JSON with
+// ?format=json). The raw dump is open by design; the /results dashboard and
+// /api/stats remain guarded by EXPORT_TOKEN.
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  if (process.env.EXPORT_TOKEN && url.searchParams.get("token") !== process.env.EXPORT_TOKEN) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
   const rows = await allResponses();
   if (url.searchParams.get("format") === "json") {
     return NextResponse.json(rows);
@@ -32,7 +32,8 @@ export async function GET(req: Request) {
   return new NextResponse(toCsv(rows), {
     headers: {
       "content-type": "text/csv; charset=utf-8",
-      "content-disposition": 'attachment; filename="triz_2afc_responses.csv"',
+      "content-disposition": 'attachment; filename="results.csv"',
+      "cache-control": "no-store",
     },
   });
 }

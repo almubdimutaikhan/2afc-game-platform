@@ -14,3 +14,7 @@ next-env.d.ts
 *firebase-adminsdk*.json
 *service-account*.json
 *serviceAccount*.json
+
+# all dotenv variants (secrets) except the example
+.env.*
+!.env.example
