@@ -4,10 +4,11 @@ import { allResponses } from "@/lib/db";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Public CSV: rater + TRIZ-relevant columns only. Device/timing/id fields
+// (id, session_id, created_at, time_ms, user_agent) are omitted.
 const COLS = [
-  "id", "created_at", "session_id", "rater_label", "expertise", "pair_id",
-  "case_id", "model", "triz_side", "chosen_side", "chosen_arm",
-  "round_index", "time_ms", "user_agent",
+  "rater_label", "expertise", "case_id", "model",
+  "triz_side", "chosen_side", "chosen_arm",
 ];
 
 function toCsv(rows: any[]): string {
