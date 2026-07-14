@@ -201,6 +201,56 @@ export async function insertReview(b: ReviewBallot): Promise<void> {
   );
 }
 
+// ---------- method-comparison ballots (the /compare page) ----------
+// One ballot = (rater, model): top-5 per-principle outputs (P##) vs top-5
+// iterative-chain outputs (R##) for the boot problem.
+const FB_COMPARES = process.env.FIREBASE_COMPARES_COLLECTION || "boot_compares";
+const compareFileStore = () => path.join(process.cwd(), ".data", "compares.ndjson");
+
+export type CompareBallot = {
+  rater_label: string;
+  case_id: string;
+  model: string;
+  top_a: string[];
+  top_b: string[];
+  created_at?: string;
+};
+
+export async function insertCompare(b: CompareBallot): Promise<void> {
+  if (USE_FIREBASE) {
+    const { admin, db } = await firestore();
+    await db.collection(FB_COMPARES).add({
+      ...b,
+      created_at: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    return;
+  }
+  const dir = path.dirname(compareFileStore());
+  await fs.mkdir(dir, { recursive: true });
+  await fs.appendFile(
+    compareFileStore(),
+    JSON.stringify({ ...b, created_at: new Date().toISOString() }) + "\n",
+  );
+}
+
+export async function allCompares(): Promise<any[]> {
+  if (USE_FIREBASE) {
+    const { db } = await firestore();
+    const snap = await db.collection(FB_COMPARES).orderBy("created_at").get();
+    return snap.docs.map((d: any) => {
+      const x = d.data();
+      const ca = x.created_at;
+      return { id: d.id, ...x, created_at: ca?.toDate ? ca.toDate().toISOString() : ca ?? null };
+    });
+  }
+  try {
+    const txt = await fs.readFile(compareFileStore(), "utf8");
+    return txt.trim() ? txt.trim().split("\n").map((l) => JSON.parse(l)) : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function allReviews(): Promise<any[]> {
   if (USE_FIREBASE) {
     const { db } = await firestore();

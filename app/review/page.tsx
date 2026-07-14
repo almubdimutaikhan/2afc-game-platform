@@ -182,6 +182,7 @@ export default function ReviewPage() {
         </div>
         <nav className="flex gap-2 text-sm">
           <a href="/" className="rounded-lg border border-white/10 px-3 py-1.5 text-slate-300 hover:bg-white/5">2AFC game</a>
+          <a href="/compare" className="rounded-lg border border-white/10 px-3 py-1.5 text-slate-300 hover:bg-white/5">Method comparison</a>
           <a href="/review/dashboard" className="rounded-lg border border-white/10 px-3 py-1.5 text-slate-300 hover:bg-white/5">Dashboard →</a>
         </nav>
       </header>
