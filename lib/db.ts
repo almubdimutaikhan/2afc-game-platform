@@ -162,3 +162,59 @@ export async function allResponses(): Promise<any[]> {
 
 export const usingDb = Boolean(USE_FIREBASE || DB_URL);
 export const storageBackend = USE_FIREBASE ? "firebase" : DB_URL ? "postgres" : "file";
+
+// ---------- p40 review ballots (the /review tab) ----------
+// One ballot = one (rater, problem, model) rating: up to 3 starred principles
+// out of the 40, like/dislike votes on the 3 non-principle prompts, and an
+// explicit "none of the 40 beats the baselines" flag. Stored in a separate
+// Firestore collection (or a local ndjson in dev). Postgres is not used here.
+const FB_REVIEWS = process.env.FIREBASE_REVIEWS_COLLECTION || "p40_reviews";
+const reviewFileStore = () => path.join(process.cwd(), ".data", "reviews.ndjson");
+
+export type ReviewBallot = {
+  rater_label: string;
+  expertise: string | null;
+  case_id: string;
+  model: string;
+  picks: string[];             // e.g. ["P13","P02"] (max 3)
+  none_better: boolean;
+  vote_t_off: number;          // 1 like, -1 dislike, 0 no vote
+  vote_t_on: number;
+  vote_all40: number;
+  created_at?: string;
+};
+
+export async function insertReview(b: ReviewBallot): Promise<void> {
+  if (USE_FIREBASE) {
+    const { admin, db } = await firestore();
+    await db.collection(FB_REVIEWS).add({
+      ...b,
+      created_at: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    return;
+  }
+  const dir = path.dirname(reviewFileStore());
+  await fs.mkdir(dir, { recursive: true });
+  await fs.appendFile(
+    reviewFileStore(),
+    JSON.stringify({ ...b, created_at: new Date().toISOString() }) + "\n",
+  );
+}
+
+export async function allReviews(): Promise<any[]> {
+  if (USE_FIREBASE) {
+    const { db } = await firestore();
+    const snap = await db.collection(FB_REVIEWS).orderBy("created_at").get();
+    return snap.docs.map((d: any) => {
+      const x = d.data();
+      const ca = x.created_at;
+      return { id: d.id, ...x, created_at: ca?.toDate ? ca.toDate().toISOString() : ca ?? null };
+    });
+  }
+  try {
+    const txt = await fs.readFile(reviewFileStore(), "utf8");
+    return txt.trim() ? txt.trim().split("\n").map((l) => JSON.parse(l)) : [];
+  } catch {
+    return [];
+  }
+}

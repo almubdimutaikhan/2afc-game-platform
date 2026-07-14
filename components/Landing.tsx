@@ -85,6 +85,12 @@ export default function Landing({
       <p className="mt-4 text-center text-xs text-slate-500">
         Anonymous responses are stored for research analysis.
       </p>
+      <p className="mt-2 text-center text-xs text-slate-600">
+        Research team:{" "}
+        <a href="/review" className="underline hover:text-slate-400">
+          per-principle output review →
+        </a>
+      </p>
     </motion.div>
   );
 }
